@@ -22,7 +22,7 @@
         <!--- Divider -->
         <div id="sidebar-menu">
             <ul>
-                <li style="<?=$this->session->akses=='admin'?'display:block':'display:none'?>">
+                <li>
                     <a href="<?=base_url().'bo/buku'?>" class="waves-effect <?=($page=='buku')?'active':null?>">
                         <i class="md md-dashboard"></i><span>Buku</span>
                     </a>

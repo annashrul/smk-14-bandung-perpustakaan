@@ -6,14 +6,27 @@
                     <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12 noPadding">
                         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
                             <div class="form-group">
+                                <label>Jurusan</label>
+                                <?php $field = 'any_jurusan';
+                                $option = null; $option[''] = 'Semua';
+                                //$option['all'] = 'All';
+                                $data_option = $this->m_crud->read_data('tbl_jurusan', '*');
+                                foreach($data_option as $row){ $option[$row['id']] = $row['title']; }
+                                echo form_dropdown($field, $option, isset($this->session->search[$field])?$this->session->search[$field]:set_value($field), array('class' => 'select2', 'id'=>$field));
+                                ?>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                            <div class="form-group">
                                 <label>Cari</label>
                                 <input type="text" name="any" class="form-control pull-right" id="any" value="<?=isset($this->session->search['any'])?$this->session->search['any']:''?>" placeholder="Cari disini ...">
                             </div>
                         </div>
+
                         <div class="col-lg-4 col-md-1 col-sm-12 col-xs-12 ">
                             <div class="form-group">
                                 <button type="button" class="btn btn-primary bg-blue" onclick="cari()" data-toggle="tooltip" data-placement="top" title="" data-original-title="Cari" style="margin-top: 25px;"><i class="fa fa-search"></i></button>
-                                <button type="button" class="btn waves-effect waves-light btn-primary" onclick="add(); validasi('add');" data-toggle="tooltip" data-placement="top" title="" data-original-title="Tambah" style="margin-top: 25px;"><i class="fa fa-plus"></i></button>
+                                <button type="button" class="btn waves-effect waves-light btn-primary" onclick="add(); validasi('add');" data-toggle="tooltip" data-placement="top" title="" data-original-title="Tambah" style="margin-top: 25px;<?=$this->session->akses!='siswa'? 'display:block' : 'display:none' ?>"><i class="fa fa-plus"></i></button>
                             </div>
                         </div>
                     </div>
@@ -62,9 +75,22 @@
                         <select name="<?=$label?>" id="<?=$label?>" class="form-control"></select>
                     </div>
                     <div class="form-group">
+                        <?php $label="id_jurusan";?>
+                        <label>Jurusan</label>
+                        <select name="<?=$label?>" id="<?=$label?>" class="form-control"></select>
+                    </div>
+
+                    <div class="form-group">
                         <?php $field = 'keterangan';?>
                         <label>Keterangan</label>
                         <textarea name="<?=$field?>" id="<?=$field?>" cols="30" rows="10" class="form-control"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <?php $label = 'file_reader'; ?>
+                        <label>Files <small id="title" style="color: #1e88e5;font-weight: bold"></small></label>
+                        <input type="hidden" id="<?=$label?>ed" name="<?=$label?>ed" />
+                        <input type="file" id="<?=$label?>" name="<?=$label?>" class="form-control">
                     </div>
                     <div class="form-group">
                         <?php $label = 'file_upload'; ?>
@@ -183,6 +209,7 @@
 			success   : function(data) {
 				$('#id_category_buku').html(data.kategori);
 				$('#id_lokasi').html(data.lokasi);
+				$("#id_jurusan").html(data.jurusan);
 				console.log(data);
 			}
 		});
@@ -191,7 +218,8 @@
 
 	function cari() {
 		var any = $("#any").val();
-		load_data(1, {search: true, any: any});
+		var any_jurusan = $("#any_jurusan").val();
+		load_data(1, {search: true, any: any,any_jurusan:any_jurusan});
 	}
 	$("#any").on("keyup keypress",function(e){
 		var keyCode = e.keyCode || e.which;
@@ -220,7 +248,11 @@
 					$("#keterangan").val(res.res_data['keterangan']);
 					$("#id_category_buku").val(res.res_data['id_category_buku']);
 					$("#id_lokasi").val(res.res_data['id_lokasi']);
+					$("#id_jurusan").val(res.res_data['id_jurusan']);
+					$("#title").text('( '+res.res_data['files']+' )');
 					$('#file_upload').val('');
+					$('#file_reader').val('');
+					$("#file_readered").val(res.res_data['files']);
 					$('#file_uploaded').val((res.res_data['gambar']!=''?res.res_data['gambar']:''));
 					$('#result_image').attr('src', '<?= base_url() ?>' + (res.res_data['gambar']!=''?res.res_data['gambar']:'assets/no_image.png'));
 					$("#modal_form").modal("show");
@@ -260,6 +292,9 @@
 			},
 			id_lokasi:{
 				required: true
+			},
+			id_jurusan:{
+				required: true
 			}
 		},
 		//For custom messages
@@ -276,6 +311,9 @@
 			},
 			id_lokasi:{
 				required: "Lokasi Buku Tidak Boleh Kosong!"
+			},
+			id_jurusan:{
+				required: "Jurusan Tidak Boleh Kosong!"
 			}
 		},
 		errorElement : 'div',

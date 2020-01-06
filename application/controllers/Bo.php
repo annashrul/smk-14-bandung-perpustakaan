@@ -42,20 +42,34 @@ class Bo extends CI_Controller{
 	}
 
     public function buku($action=null){
-        $this->access_denied();
         $page	= 'buku';
         $table	= 'tbl_buku';
         $where	= null;
         $data 	= array('page'=>$page,'isi'=>'bo/pages/'.$page);
         $response = array();
         $this->session->unset_userdata('search');
-        isset($_POST["search"]) ? $this->session->set_userdata('search', array('any' => $_POST['any'])) : null;
+        isset($_POST["search"]) ? $this->session->set_userdata('search', array('any' => $_POST['any'],'any_jurusan'=> $_POST['any_jurusan'])) : null;
         $search = $this->session->search['any'];
+        $jurusan = $this->session->search['any_jurusan'];
         if(isset($search)&&$search!=null) {
             ($where == null) ? null : $where .= " AND ";
-            $where .= "nama like '%".$search."%'";
+            $where .= "tb.nama like '%".$search."%'";
         }
-        $count = $this->m_crud->count_data($table, "id", $where);
+        if(isset($jurusan)&&$jurusan!=null) {
+            ($where == null) ? null : $where .= " AND ";
+            $where .= "tb.id_jurusan='".$jurusan."'";
+        }
+
+        $join = array(
+            array("type"=>"LEFT","table"=>"tbl_category_buku tcb"),
+            array("type"=>"LEFT","table"=>"tbl_lokasi tl"),
+            array("type"=>"LEFT","table"=>"tbl_jurusan tj"),
+        );
+        $on = array("tcb.id=tb.id_category_buku","tl.id=tb.id_lokasi","tj.id=tb.id_jurusan");
+
+//        $count = $this->m_crud->count_data($table." tb", "tb.id", $where);
+        $count = $this->m_crud->count_data_join($table." tb", 'tb.id', $join, $on, $where);
+
         if($action == "get"){
             $config = array();
             $config["base_url"] 				= "#";
@@ -87,14 +101,20 @@ class Bo extends CI_Controller{
             $start 	= ($hal - 1) * $config["per_page"];
             $read_data = $this->m_crud->join_data(
                 "$table tb",
-                "tb.*,tcb.nama nama_kategori,tl.nama nama_lokasi",
-                array(array("type"=>"LEFT","table"=>"tbl_category_buku tcb"),array("type"=>"LEFT","table"=>"tbl_lokasi tl")),
-                array("tcb.id=tb.id_category_buku","tl.id=tb.id_lokasi"),
+                "tb.*,tcb.nama nama_kategori,tl.nama nama_lokasi,tj.title nama_jurusan",
+                $join,$on,
+//                array("tcb.id=tb.id_category_buku","tl.id=tb.id_lokasi","tj.id=tb.id_jurusan"),
                 $where,
-                "id desc",null,$config["per_page"], $start);
+                "tb.id desc",null,$config["per_page"], $start);
 
             $res_index = "";
             if($read_data != null){
+                $display = '';
+                if($this->session->akses != 'siswa'){
+                    $display.= "display:block";
+                }else{
+                    $display.= "display:none";
+                }
                 foreach ($read_data as $row):
                     if($row['gambar']!=null || $row['gambar']!= ''){
                         $gambar = base_url().$row['gambar'];
@@ -103,23 +123,21 @@ class Bo extends CI_Controller{
                     }
                     $res_index.=/** @lang text */
                     '<div class="col-xs-12 col-md-4" style="margin-bottom:20px;">
-                        <!-- Card -->
                         <article class="card animated fadeInLeft">
                             <img class="card-img-top img-responsive" src="'.$gambar.'" alt="Deer in nature" style="height:300px;width:100%;" />
                             <div class="card-block">
                                 <h4 class="card-title">'.$row["nama"].'</h4>
-                                <h6 class="text-muted">'.$row["nama_kategori"].' | '.$row["nama_lokasi"].'</h6>
+                                <h6 class="text-muted">'.$row["nama_kategori"].' | '.$row["nama_lokasi"].' | '.$row["nama_jurusan"].'</h6>
                                 <p style="word-break:break-all" class="card-text">'.$row["keterangan"].'</p>
                                 <hr/>
-                                <a href="#"  onclick="edit('."'".$row['id']."'".')" class="btn btn-primary">Edit</a>
-                                <a href="#"  onclick="hapus('."'".$row['id']."'".')" class="btn btn-primary">Hapus</a>
-                                <a href="#"  onclick="getPinjam('."'".$row['id']."','".$row['nama']."'".')" class="btn btn-primary">Pinjam</a>
+                                <button onclick="edit('."'".$row['id']."'".')" class="btn btn-primary" style="'.$display.'">Edit</button>
+                                <button onclick="hapus('."'".$row['id']."'".')" class="btn btn-primary" style="'.$display.'">Hapus</button>
+                                <a href="'.base_url().$row["files"].'"  class="btn btn-primary">Baca</a>
                             </div>
-                        </article><!-- .end Card -->
+                        </article>
                     </div>
 					';
                 endforeach;
-
             }else{
                 $res_index .=
                 /**@lang text */
@@ -144,10 +162,10 @@ class Bo extends CI_Controller{
             $this->db->trans_begin();
             $path = 'assets/upload/buku';
             $config['upload_path']          = './'.$path;
-            $config['allowed_types']        = 'bmp|gif|jpg|jpeg|png';
+            $config['allowed_types']        = 'bmp|gif|jpg|jpeg|png|pdf';
             $config['max_size']             = 5120;
             $this->load->library('upload', $config);
-            $input_file = array('1'=>'file_upload');
+            $input_file = array('1'=>'file_upload','2'=>'file_reader');
             $valid = true;
 
             foreach($input_file as $row){
@@ -177,12 +195,19 @@ class Bo extends CI_Controller{
                     'keterangan'   => $this->input->post('keterangan'),
                     'id_category_buku'   => $this->input->post('id_category_buku'),
                     'id_lokasi'   => $this->input->post('id_lokasi'),
+                    'id_jurusan'   => $this->input->post('id_jurusan'),
                 );
 
                 if($_FILES['file_upload']['name']!=null) {
                     $data_buku['gambar' ] = ($_FILES['file_upload']['name']!=null)?($path.'/'.$file['file_upload']['file_name']):null;
                     if($_POST['file_uploaded']!=null||$_POST['file_uploaded']!=''){
                         unlink($_POST['file_uploaded']);
+                    }
+                }
+                if($_FILES['file_reader']['name']!=null) {
+                    $data_buku['files' ] = ($_FILES['file_reader']['name']!=null)?($path.'/'.$file['file_reader']['file_name']):null;
+                    if($_POST['file_readered']!=null||$_POST['file_readered']!=''){
+                        unlink($_POST['file_readered']);
                     }
                 }
 
@@ -222,23 +247,29 @@ class Bo extends CI_Controller{
         elseif ($action == 'hapus'){
             $read_data = $this->m_crud->get_data($table,"$table.*","id='".$_POST['id']."'");
             $read_data != "" ? unlink($read_data['gambar']) : NULL;
+            $read_data != "" ? unlink($read_data['files']) : NULL;
             $where 	= array('id' => $_POST['id']);
             $result = $this->m_crud->delete_data($table, $where);
             echo json_encode($result);
         }
         elseif ($action == 'get_dropdown'){
-            $kategori='';$lokasi='';
+            $kategori='';$lokasi='';$jurusan='';
             $read_kategori = $this->m_crud->read_data("tbl_category_buku tc","tc.id id_category,tc.nama nama_kategori");
             $read_lokasi = $this->m_crud->read_data("tbl_lokasi tl","tl.id id_lokasi,tl.nama nama_lokasi");
+            $read_jurusan = $this->m_crud->read_data("tbl_jurusan","*");
             $kategori.='<option value="">Pilih Kategori Buku</option>';
             $lokasi.='<option value="">Pilih Lokasi Buku</option>';
+            $jurusan.='<option value="">Pilih Jurusan</option>';
             foreach ($read_kategori as $row){
                 $kategori.='<option value="'.$row["id_category"].'">'.$row["nama_kategori"].'</option>';
             }
             foreach ($read_lokasi as $row){
                 $lokasi.='<option value="'.$row["id_lokasi"].'">'.$row["nama_lokasi"].'</option>';
             }
-            echo json_encode(array('kategori'=>$kategori,'lokasi'=>$lokasi));
+            foreach ($read_jurusan as $row){
+                $jurusan.='<option value="'.$row["id"].'">'.$row["title"].'</option>';
+            }
+            echo json_encode(array('kategori'=>$kategori,'lokasi'=>$lokasi,'jurusan'=>$jurusan));
         }
         elseif ($action == 'pinjam'){
 
