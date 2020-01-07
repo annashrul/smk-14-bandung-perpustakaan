@@ -60,9 +60,10 @@
       <file leaf-file-name="buku.php" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/views/bo/pages/buku.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="352">
-              <caret line="28" column="308" selection-start-line="28" selection-start-column="308" selection-end-line="28" selection-end-column="308" />
+            <state relative-caret-position="240">
+              <caret line="39" column="43" lean-forward="true" selection-start-line="39" selection-start-column="43" selection-end-line="39" selection-end-column="43" />
               <folding>
+                <element signature="n#style#0;n#button#1;n#div#0;n#div#2;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#!!top" expanded="true" />
                 <element signature="n#div#1;n#!!top" />
                 <element signature="n#style#0;n#small#0;n#label#0;n#div#5;n#div#0;n#form#0;n#div#0;n#div#0;n#div#1;n#!!top" expanded="true" />
                 <element signature="n#div#2;n#!!top" />
@@ -195,8 +196,7 @@
     <servers />
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
+    <option name="x" value="676" />
     <option name="width" value="697" />
     <option name="height" value="735" />
   </component>
@@ -265,7 +265,7 @@
     <property name="com.intellij.database.dataSource.DataSourceTemplate" value="MySQL" />
     <property name="database.console.LAST_STATE" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="8.13.0" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../thaibah-web/dev" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.General" />
   </component>
@@ -350,12 +350,12 @@
       <workItem from="1576999073987" duration="63000" />
       <workItem from="1577003811296" duration="20762000" />
       <workItem from="1577182881042" duration="23000" />
-      <workItem from="1578294274309" duration="3724000" />
+      <workItem from="1578294274309" duration="4448000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="253790000" />
+    <option name="totallyTimeSpent" value="254514000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
@@ -365,10 +365,10 @@
       <window_info anchor="bottom" id="Database Changes" order="8" weight="0.32838285" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info anchor="bottom" id="Terminal" order="7" weight="0.32838285" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="7" visible="true" weight="0.32838285" />
       <window_info anchor="right" id="Remote Host" order="3" weight="0.33509833" />
       <window_info anchor="bottom" id="Database Console" order="7" weight="0.49174917" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4620462" visible="true" weight="0.2602118" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4620462" visible="true" weight="0.2602118" />
       <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="3" weight="0.23373677" />
       <window_info id="Structure" order="1" sideWeight="0.5379538" side_tool="true" weight="0.22995462" />
@@ -648,9 +648,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/views/bo/pages/buku.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="28" column="308" selection-start-line="28" selection-start-column="308" selection-end-line="28" selection-end-column="308" />
+        <state relative-caret-position="240">
+          <caret line="39" column="43" lean-forward="true" selection-start-line="39" selection-start-column="43" selection-end-line="39" selection-end-column="43" />
           <folding>
+            <element signature="n#style#0;n#button#1;n#div#0;n#div#2;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#div#0;n#!!top" expanded="true" />
             <element signature="n#div#1;n#!!top" />
             <element signature="n#style#0;n#small#0;n#label#0;n#div#5;n#div#0;n#form#0;n#div#0;n#div#0;n#div#1;n#!!top" expanded="true" />
             <element signature="n#div#2;n#!!top" />
