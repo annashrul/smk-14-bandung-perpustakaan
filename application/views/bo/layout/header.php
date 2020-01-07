@@ -61,7 +61,6 @@
     <script src="<?=base_url().'assets/assets/'?>js/modernizr.min.js"></script>
 
     <script src="<?=base_url().'assets/assets/'?>assets/jQuery-autocomplete/jquery.autocomplete.js" type="text/javascript"></script>
-
     <style>
         .autocomplete-suggestions { border: 1px solid #999; background: #fff; cursor: default; overflow: auto; }
         .autocomplete-suggestion { padding: 10px 5px; font-size: 1.2em; white-space: nowrap; overflow: hidden; }

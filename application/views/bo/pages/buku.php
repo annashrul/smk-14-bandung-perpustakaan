@@ -4,6 +4,7 @@
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12 noPadding">
+
                         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
                             <div class="form-group">
                                 <label>Jurusan</label>
@@ -23,10 +24,10 @@
                             </div>
                         </div>
 
-                        <div class="col-lg-4 col-md-1 col-sm-12 col-xs-12 ">
+                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 ">
                             <div class="form-group">
                                 <button type="button" class="btn btn-primary bg-blue" onclick="cari()" data-toggle="tooltip" data-placement="top" title="" data-original-title="Cari" style="margin-top: 25px;"><i class="fa fa-search"></i></button>
-                                <button type="button" class="btn waves-effect waves-light btn-primary" onclick="add(); validasi('add');" data-toggle="tooltip" data-placement="top" title="" data-original-title="Tambah" style="margin-top: 25px;<?=$this->session->akses!='siswa'? 'display:block' : 'display:none' ?>"><i class="fa fa-plus"></i></button>
+                                <button type="button" class="btn btn-primary bg-blue" onclick="add(); validasi('add');" data-toggle="tooltip" data-placement="top" title="" data-original-title="Tambah" style="margin-top: 25px;"><i class="fa fa-plus"></i></button>
                             </div>
                         </div>
                     </div>
@@ -112,54 +113,31 @@
 <input type="hidden" name="page" id="page">
 
 <!--********************************** MODAL PINJAM ******************************-->
-<div class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" id="modal_pinjam" style="display: none">
-    <div class="modal-dialog ">
+<div class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" id="modal_reader" style="display: none">
+    <div class="modal-dialog modal-full">
         <div class="modal-content">
             <div class="modal-header noPadding">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="modal_title_pinjam">Form Peminjaman</h4>
             </div>
-            <form id="form_input">
-                <div class="modal-body">
+            <div class="modal-body">
+                <div class='embed-responsive' style='padding-bottom:150%' id="result_reader">
 
-                    <div class="form-group">
-                        <?php $label="id_siswa";?>
-                        <label>Nama Siswa</label>
-                        <input type="text" name="<?=$label?>" id="<?=$label?>" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <?php $label="judul";?>
-                        <label>Judul Buku</label>
-                        <input type="text" name="<?=$label?>" id="<?=$label?>" class="form-control" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="">Jurusan</label>
-                        <?php $label='id_jurusan'; ?>
-                        <select name="<?=$label?>" id="<?=$label?>" class="form-control">
-                            <?php $read = $this->m_crud->read_data('tbl_jurusan','id,title');  foreach($read as $row) : ?>
-                            <option value="<?=$row['id']?>"><?=$row['title']?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <?php $field = 'catatan';?>
-                        <label>Catatan</label>
-                        <textarea name="<?=$field?>" id="<?=$field?>" cols="20" rows="10" class="form-control"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <?php $label="created_at";?>
-                        <label>Tanggal</label>
-                        <input type="text" name="created_at" id="<?=$label?>" class="form-control" value="<?=date('Y m d H:m:s')?>">
-                    </div>
                 </div>
-                <div class="modal-footer"><button type="submit" class="btn btn-primary" id="simpan_trx" name="simpan_trx">Simpan</button></div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+<style>
+    .embed-responsive {
+        position: relative;
+        display: block;
+        height: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+</style>
 
 <script type="text/javascript">
 	var url = "<?=base_url('bo/buku/')?>"; //** url assets **//
@@ -172,6 +150,23 @@
 		var page = $(this).data("ci-pagination-page");
 		load_data(page);
 	});
+
+	function readPdf(id){
+        alert(id);
+		$.ajax({
+			url       : url+"reader_pdf",
+			method    : "POST",
+			dataType  : "JSON",
+            data:{id:id},
+			beforeSend: function() {$('body').append('<div class="first-loader"><img src="'+img+'spin.svg"></div>')},
+			complete  : function() {$('.first-loader').remove()},
+			success   : function(data) {
+				$("#modal_reader").modal("show");
+				$("#result_reader").html(data.result);
+			}
+		});
+    }
+
 	function add() {
 		$("#modal_title").text("Tambah Pengurus");
 		$("#param").val("add");

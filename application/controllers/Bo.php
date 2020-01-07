@@ -130,9 +130,15 @@ class Bo extends CI_Controller{
                                 <h6 class="text-muted">'.$row["nama_kategori"].' | '.$row["nama_lokasi"].' | '.$row["nama_jurusan"].'</h6>
                                 <p style="word-break:break-all" class="card-text">'.$row["keterangan"].'</p>
                                 <hr/>
-                                <button onclick="edit('."'".$row['id']."'".')" class="btn btn-primary" style="'.$display.'">Edit</button>
-                                <button onclick="hapus('."'".$row['id']."'".')" class="btn btn-primary" style="'.$display.'">Hapus</button>
-                                <a href="'.base_url().$row["files"].'"  class="btn btn-primary">Baca</a>
+                                <div class="col-md-4 col-xs-4">
+                                    <a href="#" onclick="edit('."'".$row['id']."'".')" class="btn btn-primary" style="'.$display.'">Edit</a>
+                                </div>
+                                <div class="col-md-4 col-xs-4">
+                                    <a href="#" onclick="hapus('."'".$row['id']."'".')" class="btn btn-primary" style="'.$display.'">Hapus</a>
+                                </div>
+                                 <div class="col-md-4 col-xs-4 ">
+                                    <a onclick="readPdf('."'".$row['id']."'".')"  class="btn btn-primary">Baca</a>
+                                </div>
                             </div>
                         </article>
                     </div>
@@ -294,10 +300,26 @@ class Bo extends CI_Controller{
             echo json_encode(array('result'=>$read_data));
 
         }
+        elseif ($action == 'reader_pdf'){
+            $id = $_POST['id'];
+            $read_data = $this->db->query("select * from tbl_buku where id=$id")->row_array();
+            $result='
+
+                <object data="'.base_url().$read_data['files'].'#toolbar=0" type="application/pdf" width="actual-width.px" height="actual-height.px"></object>    
+            ';
+            echo json_encode(array('result'=>$result));
+        }
         else{
             $this->load->view('bo/layout/wrapper',$data);
         }
     }
+
+    public function readerpdf($id){
+        $read_data = $this->m_crud->get_data("tbl_buku","*","id='".$id."'");
+        $data 	= array('read_data'=>$read_data);
+        $this->load->view('bo/pages/readerpdf',$data);
+    }
+
     public function kategori($action=null){
         $this->access_denied();
         $page	= 'kategori';
