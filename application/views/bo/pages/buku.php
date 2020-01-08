@@ -1,3 +1,11 @@
+<style>
+    @media (max-width: 576px) {
+        #gbr-book{height: 100%!important;}
+    }
+    @media (max-width: 300px) {
+        #gbr-book{height: 100%!important;}
+    }
+</style>
 <div class="row">
     <div class="col-md-12">
         <div class="panel panel-default">
@@ -27,7 +35,12 @@
                         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 ">
                             <div class="form-group">
                                 <button type="button" class="btn btn-primary bg-blue" onclick="cari()" data-toggle="tooltip" data-placement="top" title="" data-original-title="Cari" style="margin-top: 25px;"><i class="fa fa-search"></i></button>
-                                <button type="button" class="btn btn-primary bg-blue" onclick="add(); validasi('add');" data-toggle="tooltip" data-placement="top" title="" data-original-title="Tambah" style="margin-top: 25px;"><i class="fa fa-plus"></i></button>
+                                <?php if($this->session->akses != 'siswa'){ ?>
+                                    <button type="button" class="btn btn-primary bg-blue" onclick="add(); validasi('add');" data-toggle="tooltip" data-placement="top" title="" data-original-title="Tambah" style="margin-top: 25px;">
+                                        <i class="fa fa-plus" style=""></i>
+                                    </button>
+                                <?php } ?>
+
                             </div>
                         </div>
                     </div>
@@ -119,7 +132,7 @@
             <div class="modal-header noPadding">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="modal_title_pinjam">Form Peminjaman</h4>
+                <h4 class="modal-title" id="modal_title_pinjam"></h4>
             </div>
             <div class="modal-body">
                 <div class='embed-responsive' style='padding-bottom:150%' id="result_reader">
@@ -152,7 +165,6 @@
 	});
 
 	function readPdf(id){
-        alert(id);
 		$.ajax({
 			url       : url+"reader_pdf",
 			method    : "POST",
@@ -163,6 +175,7 @@
 			success   : function(data) {
 				$("#modal_reader").modal("show");
 				$("#result_reader").html(data.result);
+				$("#modal_title_pinjam").html(data.title);
 			}
 		});
     }

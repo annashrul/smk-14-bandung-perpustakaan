@@ -32,20 +32,23 @@
                 <div class="row">
                     <div class="container m-t-md">
                         <!-- First row -->
-                        <table class="table table-striped table-bordered table-responsive table-hover">
-                            <thead>
-                            <tr>
-                                <th width="1%">No</th>
-                                <th width="7%">Gambar</th>
-                                <th width="10%">ISBN</th>
-                                <th width="20%">Nama</th>
-                                <th width="30%">Catatan</th>
-                                <th width="4%">Qty</th>
-                                <th width="4%">Aksi</th>
-                            </tr>
-                            </thead>
-                            <tbody id="result_table"></tbody>
-                        </table>
+                        <div class="table-responsive">
+
+                            <table class="table table-striped table-bordered table-responsive table-hover">
+                                <thead>
+                                <tr>
+                                    <th width="1%">No</th>
+                                    <th width="7%">Gambar</th>
+                                    <th width="10%">ISBN</th>
+                                    <th width="20%">Nama</th>
+                                    <th width="30%">Catatan</th>
+                                    <th width="4%">Qty</th>
+                                    <th width="4%">Aksi</th>
+                                </tr>
+                                </thead>
+                                <tbody id="result_table"></tbody>
+                            </table>
+                        </div>
                         <div id="cols"></div>
                         <button class="btn btn-primary" onclick="simpan()">Simpan</button>
                         <button class="btn btn-primary" onclick="batal()">Batal</button>
@@ -132,21 +135,6 @@
 
 
     function update(qty,id,no){
-        //if(checkQty(qty) == true){
-		 //   $.ajax({
-			//    url : "<?//=base_url().'bo/updateTr'?>//",
-			//    type: "POST",
-			//    dataType:"JSON",
-			//    data:{qty:qty,id:id},
-			//    success:function(res){
-			//	    console.log(res.msg);
-			//    }
-		 //   })
-        //}else{
-		 //   alert('jumlah quantiti buku tidak boleh lebih dari 2');
-		 //   $("#qty"+no).val('2');
-        //}
-        //
 	    $.ajax({
 		    url : "<?=base_url().'bo/updateTr'?>",
 		    type: "POST",
@@ -160,23 +148,25 @@
     }
 
     function simpan(){
-        $.ajax({
-            url : "<?=base_url().'bo/insertDetPeminjaman'?>",
-            type: "POST",
-            dataType:"JSON",
-            data:{tgl_peminjaman:$("#tgl_peminjaman").val(),catatan:$("#catatan").val()},
-	        beforeSend: function() {$('body').append('<div class="first-loader"><img src="'+img+'"></div>')},
-	        complete  : function() {$('.first-loader').remove()},
-            success:function(res){
-	            // location.reload();
-	            swal('Kerja Bagus!', 'Pemijaman Buku Berhasil!', 'success');
-	            get_buku();
-            }
-        })
+    	if($("#col").val() !== '0'){
+		    $.ajax({
+			    url : "<?=base_url().'bo/insertDetPeminjaman'?>",
+			    type: "POST",
+			    dataType:"JSON",
+			    data:{tgl_peminjaman:$("#tgl_peminjaman").val(),catatan:$("#catatan").val()},
+			    beforeSend: function() {$('body').append('<div class="first-loader"><img src="'+img+'"></div>')},
+			    complete  : function() {$('.first-loader').remove()},
+			    success:function(res){
+				    // location.reload();
+				    swal('Kerja Bagus!', 'Pemijaman Buku Berhasil!', 'success');
+				    get_buku();
+			    }
+		    })
+        }
+
     }
 
     function batal(){
-    	console.log("<?=$this->session->id?>");
 	    $.ajax({
 		    url : "<?=base_url().'bo/deleteAllTr'?>",
 		    type: "POST",
@@ -185,11 +175,8 @@
 		    complete  : function() {$('.first-loader').remove()},
 		    success:function(res){
 			    console.log(res.msg);
-                if(res.status == 'success'){
-	                location.reload();
-                }else{
-                	console.log(res.msg);
-                }
+			    get_buku();
+
 		    }
 	    })
     }

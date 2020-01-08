@@ -22,7 +22,7 @@
                 <div class="row">
                     <div class="container m-t-md">
                         <!-- First row -->
-                        <div class="row" >
+                        <div class="table-responsive">
                             <table class="table table-bordered table-hover">
                                 <thead>
                                 <tr>

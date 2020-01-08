@@ -23,16 +23,18 @@
                 <div class="row">
                     <div class="container m-t-md">
                         <!-- First row -->
-                        <table class="table table-striped table-bordered table-responsive table-hover">
-                            <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Nama</th>
-                                <th>Aksi</th>
-                            </tr>
-                            </thead>
-                            <tbody id="result_table"></tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-responsive table-hover">
+                                <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama</th>
+                                    <th>Aksi</th>
+                                </tr>
+                                </thead>
+                                <tbody id="result_table"></tbody>
+                            </table>
+                        </div>
                         <!-- Second row -->
                     </div>
                     <div class="col-md-12 col-sm-12 col-xs-12">

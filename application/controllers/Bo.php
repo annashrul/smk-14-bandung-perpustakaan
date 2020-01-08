@@ -59,89 +59,59 @@ class Bo extends CI_Controller{
             ($where == null) ? null : $where .= " AND ";
             $where .= "tb.id_jurusan='".$jurusan."'";
         }
-
         $join = array(
             array("type"=>"LEFT","table"=>"tbl_category_buku tcb"),
             array("type"=>"LEFT","table"=>"tbl_lokasi tl"),
             array("type"=>"LEFT","table"=>"tbl_jurusan tj"),
         );
         $on = array("tcb.id=tb.id_category_buku","tl.id=tb.id_lokasi","tj.id=tb.id_jurusan");
-
-//        $count = $this->m_crud->count_data($table." tb", "tb.id", $where);
         $count = $this->m_crud->count_data_join($table." tb", 'tb.id', $join, $on, $where);
-
         if($action == "get"){
-            $config = array();
-            $config["base_url"] 				= "#";
-            $config["total_rows"] 			= $count;
-            $config["per_page"] 				= 8;
-            $config["uri_segment"] 			= 4;
-            $config["num_links"] 				= 1;
-            $config["use_page_numbers"] = TRUE;
-            $config['first_link'] 			= 'First';
-            $config['last_link'] 				= 'Last';
-            $config['next_link'] 				= /** @lang text */'<i class="md md-navigate-next"></i>';
-            $config['prev_link'] 				= /** @lang text */'<i class="md md-navigate-before"></i>';
-            $config['full_tag_open'] 		= /** @lang text */'<div class="pagging text-center"><nav><ul class="pagination justify-content-center">';
-            $config['full_tag_close'] 	= /** @lang text */'</ul></nav></div>';
-            $config['num_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['num_tag_close'] 		= /** @lang text */'</span></li>';
-            $config['cur_tag_open']	 		= /** @lang text */'<li class="page-item active"><span class="page-link">';
-            $config['cur_tag_close'] 		= /** @lang text */'<span class="sr-only">(current)</span></span></li>';
-            $config['next_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['next_tagl_close'] 	= /** @lang text */'<span aria-hidden="true">&raquo;</span></span></li>';
-            $config['prev_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['prev_tagl_close'] 	= /** @lang text */'</span>Next</li>';
-            $config['first_tag_open'] 	= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['first_tagl_close'] = /** @lang text */'</span></li>';
-            $config['last_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['last_tagl_close'] 	= /** @lang text */'</span></li>';
-            $this->pagination->initialize($config);
-            $hal  	= $this->uri->segment(4);
-            $start 	= ($hal - 1) * $config["per_page"];
+            $pagin = $this->m_website->myPagination($count,8);
             $read_data = $this->m_crud->join_data(
                 "$table tb",
                 "tb.*,tcb.nama nama_kategori,tl.nama nama_lokasi,tj.title nama_jurusan",
-                $join,$on,
-//                array("tcb.id=tb.id_category_buku","tl.id=tb.id_lokasi","tj.id=tb.id_jurusan"),
-                $where,
-                "tb.id desc",null,$config["per_page"], $start);
-
+                $join,$on,$where,"tb.id desc",null,$pagin["per_page"], $pagin['start']
+            );
             $res_index = "";
             if($read_data != null){
-                $display = '';
-                if($this->session->akses != 'siswa'){
-                    $display.= "display:block";
-                }else{
-                    $display.= "display:none";
-                }
+
+
                 foreach ($read_data as $row):
                     if($row['gambar']!=null || $row['gambar']!= ''){
                         $gambar = base_url().$row['gambar'];
                     }else{
                         $gambar = base_url().'assets/no_image.png';
                     }
+                    if($this->session->akses != 'siswa'){
+                        $display = '
+                        <button onclick="edit('."'".$row['id']."'".')" class="btn btn-default" role="button">Edit</button> 
+                        <button onclick="hapus('."'".$row['id']."'".')" class="btn btn-default" role="button">Hapus</button>
+                        <button onclick="readPdf('."'".$row['id']."'".')" class="btn btn-default" role="button">Baca</button>
+                    ';
+                    }else{
+                        $display = '
+                        <button onclick="readPdf('."'".$row['id']."'".')" class="btn btn-default" role="button">Baca</button>
+                    ';
+                    }
                     $res_index.=/** @lang text */
-                    '<div class="col-xs-12 col-md-4" style="margin-bottom:20px;">
-                        <article class="card animated fadeInLeft">
-                            <img class="card-img-top img-responsive" src="'.$gambar.'" alt="Deer in nature" style="height:300px;width:100%;" />
-                            <div class="card-block">
-                                <h4 class="card-title">'.$row["nama"].'</h4>
-                                <h6 class="text-muted">'.$row["nama_kategori"].' | '.$row["nama_lokasi"].' | '.$row["nama_jurusan"].'</h6>
-                                <p style="word-break:break-all" class="card-text">'.$row["keterangan"].'</p>
-                                <hr/>
-                                <div class="col-md-4 col-xs-4">
-                                    <a href="#" onclick="edit('."'".$row['id']."'".')" class="btn btn-primary" style="'.$display.'">Edit</a>
-                                </div>
-                                <div class="col-md-4 col-xs-4">
-                                    <a href="#" onclick="hapus('."'".$row['id']."'".')" class="btn btn-primary" style="'.$display.'">Hapus</a>
-                                </div>
-                                 <div class="col-md-4 col-xs-4 ">
-                                    <a onclick="readPdf('."'".$row['id']."'".')"  class="btn btn-primary">Baca</a>
-                                </div>
-                            </div>
-                        </article>
-                    </div>
+                    '
+                    <div class="col-sm-6 col-md-3 col-xs-12">
+                        <div class="thumbnail">
+                           <img src="'.$gambar.'" alt="..." style="height:150px;width:100%;" id="gbr-book">
+                           <div class="caption">
+                               <h3>'.$row["nama"].'</h3>
+                               <p>'.$row["nama_kategori"].' | '.$row["nama_lokasi"].' | '.$row["nama_jurusan"].'</p>
+                               <p>'.$row["keterangan"].'</p>
+                               <p>
+                                   '.$display.'
+                               </p>
+                              
+                           </div>
+                        </div>
+                    </div>    
+                    
+                    
 					';
                 endforeach;
             }else{
@@ -152,9 +122,9 @@ class Bo extends CI_Controller{
 				</div>';
             }
             $data = array(
-                "pagination_link" => $this->pagination->create_links(),
+                "pagination_link"   => $pagin['pagination_link'],
                 "result_project" 	=> $res_index,
-                "hal"            => $hal
+                "hal"               => $this->uri->segment(4)
             );
             echo json_encode($data);
         }
@@ -303,11 +273,12 @@ class Bo extends CI_Controller{
         elseif ($action == 'reader_pdf'){
             $id = $_POST['id'];
             $read_data = $this->db->query("select * from tbl_buku where id=$id")->row_array();
+            $title = 'Buku '.$read_data['nama'];
             $result='
 
                 <object data="'.base_url().$read_data['files'].'#toolbar=0" type="application/pdf" width="actual-width.px" height="actual-height.px"></object>    
             ';
-            echo json_encode(array('result'=>$result));
+            echo json_encode(array('title'=>$title,'result'=>$result));
         }
         else{
             $this->load->view('bo/layout/wrapper',$data);
@@ -336,39 +307,12 @@ class Bo extends CI_Controller{
         }
         $count = $this->m_crud->count_data($table, "id", $where);
         if($action == "get"){
-            $config = array();
-            $config["base_url"] 				= "#";
-            $config["total_rows"] 			= $count;
-            $config["per_page"] 				= 10;
-            $config["uri_segment"] 			= 4;
-            $config["num_links"] 				= 1;
-            $config["use_page_numbers"] = TRUE;
-            $config['first_link'] 			= 'First';
-            $config['last_link'] 				= 'Last';
-            $config['next_link'] 				= /** @lang text */'<i class="md md-navigate-next"></i>';
-            $config['prev_link'] 				= /** @lang text */'<i class="md md-navigate-before"></i>';
-            $config['full_tag_open'] 		= /** @lang text */'<div class="pagging text-center"><nav><ul class="pagination justify-content-center">';
-            $config['full_tag_close'] 	= /** @lang text */'</ul></nav></div>';
-            $config['num_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['num_tag_close'] 		= /** @lang text */'</span></li>';
-            $config['cur_tag_open']	 		= /** @lang text */'<li class="page-item active"><span class="page-link">';
-            $config['cur_tag_close'] 		= /** @lang text */'<span class="sr-only">(current)</span></span></li>';
-            $config['next_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['next_tagl_close'] 	= /** @lang text */'<span aria-hidden="true">&raquo;</span></span></li>';
-            $config['prev_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['prev_tagl_close'] 	= /** @lang text */'</span>Next</li>';
-            $config['first_tag_open'] 	= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['first_tagl_close'] = /** @lang text */'</span></li>';
-            $config['last_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['last_tagl_close'] 	= /** @lang text */'</span></li>';
-            $this->pagination->initialize($config);
-            $hal  	= $this->uri->segment(4);
-            $start 	= ($hal - 1) * $config["per_page"];
+            $pagin = $this->m_website->myPagination($count,10);
             $read_data = $this->m_crud->read_data(
                 $table,"$table.*",
-                $where,"id desc",null,$config["per_page"], $start
+                $where,"id desc",null,$pagin["per_page"], $pagin["start"]
             );
-            $res_index = ""; $no = $start+1;
+            $res_index = ""; $no = ($this->uri->segment(4) - 1) * $pagin["per_page"]+1;
             if($read_data != null){
                 foreach ($read_data as $row):
                     $res_index.='
@@ -387,14 +331,15 @@ class Bo extends CI_Controller{
                         </tr>
                     ';
                 endforeach;
-            }else{
+            }
+            else{
                 $res_index .=/**@lang text */
                     '<td colspan="3"><p class="text-center">Data Tida Ada</p></td>';
             }
             $data = array(
-                "pagination_link"   => $this->pagination->create_links(),
+                "pagination_link"   => $pagin['pagination_link'],
                 "result_table" 	    => $res_index,
-                "hal"               => $hal
+                "hal"               => $this->uri->segment(4)
             );
             echo json_encode($data);
         }
@@ -470,39 +415,12 @@ class Bo extends CI_Controller{
         }
         $count = $this->m_crud->count_data($table, "id", $where);
         if($action == "get"){
-            $config = array();
-            $config["base_url"] 				= "#";
-            $config["total_rows"] 			= $count;
-            $config["per_page"] 				= 10;
-            $config["uri_segment"] 			= 4;
-            $config["num_links"] 				= 1;
-            $config["use_page_numbers"] = TRUE;
-            $config['first_link'] 			= 'First';
-            $config['last_link'] 				= 'Last';
-            $config['next_link'] 				= /** @lang text */'<i class="md md-navigate-next"></i>';
-            $config['prev_link'] 				= /** @lang text */'<i class="md md-navigate-before"></i>';
-            $config['full_tag_open'] 		= /** @lang text */'<div class="pagging text-center"><nav><ul class="pagination justify-content-center">';
-            $config['full_tag_close'] 	= /** @lang text */'</ul></nav></div>';
-            $config['num_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['num_tag_close'] 		= /** @lang text */'</span></li>';
-            $config['cur_tag_open']	 		= /** @lang text */'<li class="page-item active"><span class="page-link">';
-            $config['cur_tag_close'] 		= /** @lang text */'<span class="sr-only">(current)</span></span></li>';
-            $config['next_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['next_tagl_close'] 	= /** @lang text */'<span aria-hidden="true">&raquo;</span></span></li>';
-            $config['prev_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['prev_tagl_close'] 	= /** @lang text */'</span>Next</li>';
-            $config['first_tag_open'] 	= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['first_tagl_close'] = /** @lang text */'</span></li>';
-            $config['last_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['last_tagl_close'] 	= /** @lang text */'</span></li>';
-            $this->pagination->initialize($config);
-            $hal  	= $this->uri->segment(4);
-            $start 	= ($hal - 1) * $config["per_page"];
+            $pagin = $this->m_website->myPagination($count,10);
             $read_data = $this->m_crud->read_data(
                 $table,"$table.*",
-                $where,"id desc",null,$config["per_page"], $start
+                $where,"id desc",null,$pagin["per_page"], $pagin["start"]
             );
-            $res_index = ""; $no = $start+1;
+            $res_index = ""; $no = ($this->uri->segment(4) - 1) * $pagin["per_page"]+1;
             if($read_data != null){
                 foreach ($read_data as $row):
                     $res_index.='
@@ -526,9 +444,9 @@ class Bo extends CI_Controller{
                     '<td colspan="3"><p class="text-center">Data Tida Ada</p></td>';
             }
             $data = array(
-                "pagination_link"   => $this->pagination->create_links(),
+                "pagination_link"   => $pagin['pagination_link'],
                 "result_table" 	    => $res_index,
-                "hal"               => $hal
+                "hal"               => $this->uri->segment(4)
             );
             echo json_encode($data);
         }
@@ -619,41 +537,15 @@ class Bo extends CI_Controller{
         $count = $this->m_crud->count_join_data($table. " tmp", "tmp.id", "tbl_siswa ts", "ts.id=tmp.id_siswa", $where);
 
         if($action == "get"){
-            $config = array();
-            $config["base_url"] 				= "#";
-            $config["total_rows"] 			= $count;
-            $config["per_page"] 				= 10;
-            $config["uri_segment"] 			= 4;
-            $config["num_links"] 				= 1;
-            $config["use_page_numbers"] = TRUE;
-            $config['first_link'] 			= 'First';
-            $config['last_link'] 				= 'Last';
-            $config['next_link'] 				= /** @lang text */'<i class="md md-navigate-next"></i>';
-            $config['prev_link'] 				= /** @lang text */'<i class="md md-navigate-before"></i>';
-            $config['full_tag_open'] 		= /** @lang text */'<div class="pagging text-center"><nav><ul class="pagination justify-content-center">';
-            $config['full_tag_close'] 	= /** @lang text */'</ul></nav></div>';
-            $config['num_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['num_tag_close'] 		= /** @lang text */'</span></li>';
-            $config['cur_tag_open']	 		= /** @lang text */'<li class="page-item active"><span class="page-link">';
-            $config['cur_tag_close'] 		= /** @lang text */'<span class="sr-only">(current)</span></span></li>';
-            $config['next_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['next_tagl_close'] 	= /** @lang text */'<span aria-hidden="true">&raquo;</span></span></li>';
-            $config['prev_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['prev_tagl_close'] 	= /** @lang text */'</span>Next</li>';
-            $config['first_tag_open'] 	= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['first_tagl_close'] = /** @lang text */'</span></li>';
-            $config['last_tag_open'] 		= /** @lang text */'<li class="page-item"><span class="page-link">';
-            $config['last_tagl_close'] 	= /** @lang text */'</span></li>';
-            $this->pagination->initialize($config);
-            $hal  	= $this->uri->segment(4);
-            $start 	= ($hal - 1) * $config["per_page"];
+            $pagin = $this->m_website->myPagination($count,10);
             $read_data = $this->m_crud->join_data(
                 $table." tmp","tmp.id id_tmp,tmp.kd_trx kd_trx, tmp.status,tmp.keterangan,tmp.tgl_pinjam,tmp.tgl_kembali,ts.id id_siswa,ts.nama,ts.nis",
                 array(array("table"=>"tbl_siswa ts","type"=>"LEFT")),
                 array("ts.id=tmp.id_siswa"),
-                $where,"tmp.id desc",null,$config["per_page"], $start
+                $where,"tmp.id desc",null,$pagin["per_page"], $pagin["start"]
             );
-            $res_index = ""; $no = $start+1;
+            $res_index = ""; $no = ($this->uri->segment(4) - 1) * $pagin["per_page"]+1;
+
             if($read_data != null){
                 foreach ($read_data as $row):
                     if($row["status"] == 0){
@@ -685,14 +577,15 @@ class Bo extends CI_Controller{
                         </tr>
                     ';
                 endforeach;
-            }else{
+            }
+            else{
                 $res_index .=/**@lang text */
                     '<td colspan="8"><p class="text-center">Data Tidak Ada</p></td>';
             }
             $data = array(
-                "pagination_link"   => $this->pagination->create_links(),
+                "pagination_link"   => $pagin['pagination_link'],
                 "result_table" 	    => $res_index,
-                "hal"               => $hal
+                "hal"               => $this->uri->segment(4)
             );
             echo json_encode($data);
         }
@@ -873,13 +766,13 @@ class Bo extends CI_Controller{
                 $no++;
             }
             $response['no'] = $col;
-            $response['col'] = '<input type="hidden" class="form-control" id="col" value="'.$col.'">';
+            $response['col'] = '<input type="text" class="form-control" id="col" value="'.$col.'">';
             $response['result'] = $res_index;
             $response['status'] = 'success';
             $response['msg'] = 'berhasil mengambil data';
         }else{
             $response['no'] = '';
-            $response['col'] = '<input type="hidden" class="form-control" id="col" value="0">';
+            $response['col'] = '<input type="text" class="form-control" id="col" value="0">';
             $response['result'] = '<tr><td colspan="7"><p class="text-center">Data Tidak Ada</p></td></tr>';
             $response['status'] = 'failed';
             $response['msg']    = 'gagal mengambil data';
@@ -891,13 +784,11 @@ class Bo extends CI_Controller{
     public function insertDetPeminjaman(){
         $read_data = $this->m_crud->read_data("tbl_temporary","*","field8='".$this->session->id."'");
         $this->db->trans_begin();
-//        $kd_trx = $this->m_crud->generate_kode("PI", "01", substr(str_replace('-','',date('Y-m-d')), 2, 6));
         if($read_data != null){
             foreach($read_data as $row){
                 $dataDetail = array(
                     "id_buku"=>$row['field1'],
                     "kd_trx"=>$this->m_crud->getKodeTrx("PI"),
-
                 );
                 $this->m_crud->create_data("tbl_detail_peminjaman",$dataDetail);
             }
@@ -906,7 +797,7 @@ class Bo extends CI_Controller{
                 "keterangan" =>$_POST['catatan'],
                 "id_siswa"   =>$this->session->id,
                 "tgl_pinjam" =>$_POST['tgl_peminjaman'],
-//                "tgl_kembali"=>$_POST['tgl_pengembalian']
+
             );
             $this->m_crud->create_data("tbl_master_peminjaman",$dataMaster);
             $this->m_crud->delete_data("tbl_temporary", array("field8"=>$this->session->id));
